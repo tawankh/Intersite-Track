@@ -46,7 +46,7 @@ export function MainLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] dark:bg-[#121212] flex transition-colors duration-300">
+    <div className="min-h-screen app-shell flex transition-colors duration-300">
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -78,7 +78,7 @@ export function MainLayout({
           onCreateUser={onCreateUser}
           onMenuToggle={() => setSidebarOpen((v) => !v)}
         />
-        <div className="p-4 md:p-8 h-full overflow-y-auto text-gray-900 dark:text-gray-100">
+        <div className="p-4 md:p-8 h-full overflow-y-auto app-heading">
           {children}
         </div>
       </main>

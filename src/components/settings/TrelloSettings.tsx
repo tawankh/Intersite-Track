@@ -141,14 +141,14 @@ export default function TrelloSettings({ systemUsers }: Props) {
   return (
     <div className="space-y-6 max-w-3xl">
       {/* ── Section 1: Connection ── */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+      <div className="app-surface rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
             <Settings2 size={18} className="text-blue-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900">เชื่อมต่อ Trello</h3>
-            <p className="text-xs text-gray-400">กรอก API Key และ Token จาก trello.com/app-key</p>
+            <h3 className="font-semibold app-heading">เชื่อมต่อ Trello</h3>
+            <p className="text-xs app-soft">กรอก API Key และ Token จาก trello.com/app-key</p>
           </div>
           <div className="ml-auto">
             {isConnected
@@ -161,21 +161,21 @@ export default function TrelloSettings({ systemUsers }: Props) {
         <form onSubmit={handleSaveConfig} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">API Key</label>
-              <input type="password" className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+              <label className="block text-xs font-semibold app-muted uppercase tracking-wider mb-1">API Key</label>
+              <input type="password" className="w-full px-3 py-2 rounded-xl text-sm app-field"
                 placeholder="Trello API Key" value={form.apiKey}
                 onChange={e => setForm({ ...form, apiKey: e.target.value })} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Token</label>
-              <input type="password" className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+              <label className="block text-xs font-semibold app-muted uppercase tracking-wider mb-1">Token</label>
+              <input type="password" className="w-full px-3 py-2 rounded-xl text-sm app-field"
                 placeholder="Trello Token" value={form.token}
                 onChange={e => setForm({ ...form, token: e.target.value })} />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Board URL</label>
-            <input type="url" className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+            <label className="block text-xs font-semibold app-muted uppercase tracking-wider mb-1">Board URL</label>
+            <input type="url" className="w-full px-3 py-2 rounded-xl text-sm app-field"
               placeholder="https://trello.com/b/xxxxx/board-name" value={form.boardUrl}
               onChange={e => {
                 const url = e.target.value;
@@ -195,7 +195,7 @@ export default function TrelloSettings({ systemUsers }: Props) {
 
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={handleTestConnection} disabled={testing || !form.apiKey || !form.token || !form.boardId}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors">
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium app-muted hover:bg-gray-50 disabled:opacity-50 transition-colors">
               {testing ? <RefreshCw size={15} className="animate-spin" /> : <Wifi size={15} />}
               ทดสอบการเชื่อมต่อ
             </button>
@@ -209,12 +209,12 @@ export default function TrelloSettings({ systemUsers }: Props) {
       </div>
 
       {/* ── Section 4: Sync Options (shown early so user can toggle before mappings) ── */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+      <div className="app-surface rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center">
             <ArrowLeftRight size={18} className="text-purple-600" />
           </div>
-          <h3 className="font-semibold text-gray-900">ตัวเลือกการซิงค์</h3>
+          <h3 className="font-semibold app-heading">ตัวเลือกการซิงค์</h3>
         </div>
         <div className="space-y-4">
           <ToggleRow
@@ -241,23 +241,23 @@ export default function TrelloSettings({ systemUsers }: Props) {
       {isConnected && (
         <>
           {/* Section 2: Status Mapping */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+          <div className="app-surface rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
                 <Settings2 size={18} className="text-amber-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">แมปสถานะ → Trello List</h3>
-                <p className="text-xs text-gray-400">เลือก List ที่ตรงกับแต่ละสถานะงาน</p>
+                <h3 className="font-semibold app-heading">แมปสถานะ → Trello List</h3>
+                <p className="text-xs app-soft">เลือก List ที่ตรงกับแต่ละสถานะงาน</p>
               </div>
               {loadingBoard && <RefreshCw size={14} className="ml-auto animate-spin text-gray-400" />}
             </div>
             <div className="space-y-3">
               {ALL_STATUSES.map(status => (
                 <div key={status} className="flex items-center gap-4">
-                  <span className="w-36 text-sm font-medium text-gray-700">{STATUS_LABELS[status]}</span>
+                  <span className="w-36 text-sm font-medium app-heading">{STATUS_LABELS[status]}</span>
                   <select
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+                    className="flex-1 px-3 py-2 rounded-xl text-sm app-field"
                     value={statusMappings[status]}
                     onChange={e => setStatusMappings({ ...statusMappings, [status]: e.target.value })}
                   >
@@ -270,14 +270,14 @@ export default function TrelloSettings({ systemUsers }: Props) {
           </div>
 
           {/* Section 3: User Mapping */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+          <div className="app-surface rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
                 <Users size={18} className="text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">แมปผู้ใช้ → Trello Member</h3>
-                <p className="text-xs text-gray-400">เลือก Trello Member ที่ตรงกับเจ้าหน้าที่แต่ละคน</p>
+                <h3 className="font-semibold app-heading">แมปผู้ใช้ → Trello Member</h3>
+                <p className="text-xs app-soft">เลือก Trello Member ที่ตรงกับเจ้าหน้าที่แต่ละคน</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -286,9 +286,9 @@ export default function TrelloSettings({ systemUsers }: Props) {
                   <div className="w-8 h-8 rounded-full bg-[#F5F5F0] flex items-center justify-center text-[#5A5A40] font-bold text-xs flex-shrink-0">
                     {u.first_name[0]}{u.last_name[0]}
                   </div>
-                  <span className="w-36 text-sm font-medium text-gray-700 truncate">{u.first_name} {u.last_name}</span>
+                  <span className="w-36 text-sm font-medium app-heading truncate">{u.first_name} {u.last_name}</span>
                   <select
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+                    className="flex-1 px-3 py-2 rounded-xl text-sm app-field"
                     value={userMappings[u.id] ?? ""}
                     onChange={e => setUserMappings({ ...userMappings, [u.id]: e.target.value })}
                   >
@@ -301,7 +301,7 @@ export default function TrelloSettings({ systemUsers }: Props) {
                   </select>
                 </div>
               ))}
-              {systemUsers.length === 0 && <p className="text-sm text-gray-400">ไม่มีเจ้าหน้าที่</p>}
+              {systemUsers.length === 0 && <p className="text-sm app-soft">ไม่มีเจ้าหน้าที่</p>}
             </div>
           </div>
 
@@ -333,8 +333,8 @@ function ToggleRow({ label, description, value, onChange }: {
   return (
     <div className="flex items-center justify-between py-2">
       <div>
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        <p className="text-xs text-gray-400">{description}</p>
+        <p className="text-sm font-medium app-heading">{label}</p>
+        <p className="text-xs app-soft">{description}</p>
       </div>
       <button type="button" onClick={() => onChange(!value)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${

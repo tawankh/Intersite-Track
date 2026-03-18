@@ -34,22 +34,22 @@ export default function TrelloSyncLogs() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-end">
+      <div className="flex flex-wrap gap-3 items-end app-surface p-4 rounded-2xl">
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">จากวันที่</label>
-          <input type="date" className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+          <label className="block text-xs font-semibold app-soft uppercase tracking-wider mb-1">จากวันที่</label>
+          <input type="date" className="px-3 py-2 rounded-xl text-sm app-field"
             value={filters.dateFrom ?? ""}
             onChange={e => updateFilters({ dateFrom: e.target.value || undefined })} />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">ถึงวันที่</label>
-          <input type="date" className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+          <label className="block text-xs font-semibold app-soft uppercase tracking-wider mb-1">ถึงวันที่</label>
+          <input type="date" className="px-3 py-2 rounded-xl text-sm app-field"
             value={filters.dateTo ?? ""}
             onChange={e => updateFilters({ dateTo: e.target.value || undefined })} />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">สถานะ</label>
-          <select className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+          <label className="block text-xs font-semibold app-soft uppercase tracking-wider mb-1">สถานะ</label>
+          <select className="px-3 py-2 rounded-xl text-sm app-field"
             value={filters.status ?? ""}
             onChange={e => updateFilters({ status: (e.target.value as SyncStatus) || undefined })}>
             <option value="">ทั้งหมด</option>
@@ -59,13 +59,13 @@ export default function TrelloSyncLogs() {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Task ID</label>
-          <input type="number" min={1} className="w-24 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#5A5A40] outline-none"
+          <label className="block text-xs font-semibold app-soft uppercase tracking-wider mb-1">Task ID</label>
+          <input type="number" min={1} className="w-24 px-3 py-2 rounded-xl text-sm app-field"
             placeholder="เช่น 42"
             value={filters.taskId ?? ""}
             onChange={e => updateFilters({ taskId: e.target.value ? Number(e.target.value) : undefined })} />
         </div>
-        <button onClick={refresh} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+        <button onClick={refresh} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm app-muted hover:bg-gray-50 transition-colors">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           รีเฟรช
         </button>
@@ -78,9 +78,9 @@ export default function TrelloSyncLogs() {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-black/5">
+      <div className="overflow-x-auto rounded-2xl app-surface">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <thead className="bg-gray-50 text-xs font-semibold app-muted uppercase tracking-wider">
             <tr>
               <th className="px-4 py-3 text-left">เวลา</th>
               <th className="px-4 py-3 text-left">Task</th>
@@ -93,32 +93,32 @@ export default function TrelloSyncLogs() {
           <tbody className="divide-y divide-gray-50 bg-white">
             {loading && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-8 text-center app-soft">
                   <RefreshCw size={18} className="animate-spin inline mr-2" />กำลังโหลด...
                 </td>
               </tr>
             )}
             {!loading && (!data || data.logs.length === 0) && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">ไม่มีข้อมูล</td>
+                <td colSpan={6} className="px-4 py-8 text-center app-soft">ไม่มีข้อมูล</td>
               </tr>
             )}
             {!loading && data?.logs.map(log => (
               <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                <td className="px-4 py-3 app-muted whitespace-nowrap">
                   {new Date(log.createdAt).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })}
                 </td>
                 <td className="px-4 py-3">
                   {log.taskId ? (
-                    <span className="font-medium text-gray-800">
+                    <span className="font-medium app-heading">
                       #{log.taskId}{log.taskTitle ? ` — ${log.taskTitle}` : ""}
                     </span>
                   ) : (
-                    <span className="text-gray-400">—</span>
+                    <span className="app-soft">—</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-xs font-medium">
+                  <span className="px-2 py-0.5 rounded-md bg-gray-100 app-heading text-xs font-medium">
                     {ACTION_LABELS[log.action] ?? log.action}
                   </span>
                 </td>
@@ -127,7 +127,7 @@ export default function TrelloSyncLogs() {
                     {STATUS_LABELS[log.status]}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-500">{log.retryCount}</td>
+                <td className="px-4 py-3 app-muted">{log.retryCount}</td>
                 <td className="px-4 py-3 text-red-500 text-xs max-w-xs truncate" title={log.errorMessage}>
                   {log.errorMessage ?? "—"}
                 </td>
@@ -139,7 +139,7 @@ export default function TrelloSyncLogs() {
 
       {/* Pagination */}
       {data && totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center justify-between text-sm app-muted">
           <span>แสดง {data.logs.length} จาก {data.total} รายการ</span>
           <div className="flex items-center gap-2">
             <button onClick={() => setPage((filters.page ?? 1) - 1)} disabled={(filters.page ?? 1) <= 1}

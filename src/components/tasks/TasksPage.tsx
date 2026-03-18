@@ -23,7 +23,10 @@ export function TasksPage({ currentUser, onViewTask, onEditTask, refreshTrigger 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
-  const [viewMode, setViewMode] = useState<"list" | "board">("list");
+  const [viewMode, setViewMode] = useState<"list" | "board">(() => {
+    if (typeof window === "undefined") return "list";
+    return localStorage.getItem("tasks-view-mode") === "board" ? "board" : "list";
+  });
 
   const [filters, setFilters] = useState<FilterValues>({
     search: "", status: "", priority: "", assignee: "", dateFrom: "", dateTo: "",
@@ -50,6 +53,10 @@ export function TasksPage({ currentUser, onViewTask, onEditTask, refreshTrigger 
   useEffect(() => {
     fetchAll();
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    localStorage.setItem("tasks-view-mode", viewMode);
+  }, [viewMode]);
 
   if (loading) return <TasksSkeleton />;
 
@@ -83,27 +90,60 @@ export function TasksPage({ currentUser, onViewTask, onEditTask, refreshTrigger 
     return true;
   });
 
+  const today = new Date().toISOString().split("T")[0];
+  const summaryCards = [
+    {
+      label: "งานที่มองเห็น",
+      value: filtered.length,
+      tone: "text-[#5A5A40]",
+    },
+    {
+      label: "กำลังดำเนินการ",
+      value: filtered.filter((t) => t.status === "in_progress").length,
+      tone: "text-amber-600",
+    },
+    {
+      label: "เลยกำหนด",
+      value: filtered.filter((t) => t.status !== "completed" && t.status !== "cancelled" && t.due_date && t.due_date < today).length,
+      tone: "text-rose-600",
+    },
+    {
+      label: "เสร็จสิ้น",
+      value: filtered.filter((t) => t.status === "completed").length,
+      tone: "text-emerald-600",
+    },
+  ];
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-6">
       <TaskFilters users={users} onFilterChange={setFilters} />
 
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        {summaryCards.map((card) => (
+          <div key={card.label} className="app-surface-subtle rounded-2xl px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] app-soft mb-2">{card.label}</p>
+            <p className={`text-2xl font-serif font-bold ${card.tone}`}>{card.value}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm app-muted">
           แสดง {filtered.length} จาก {myTasks.length} งาน
         </p>
         
         {features.kanbanBoard.enabled && (
-          <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-black/5 dark:border-white/5">
+          <div className="flex items-center app-surface rounded-lg p-1">
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-[#5A5A40] text-white shadow" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"}`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-[#5A5A40] text-white shadow" : "app-soft hover:text-[#1f1d16] dark:hover:text-gray-100"}`}
               title="แบบรายการ"
             >
               <List size={16} />
             </button>
             <button
               onClick={() => setViewMode("board")}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === "board" ? "bg-[#5A5A40] text-white shadow" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"}`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "board" ? "bg-[#5A5A40] text-white shadow" : "app-soft hover:text-[#1f1d16] dark:hover:text-gray-100"}`}
               title="แบบบอร์ด"
             >
               <LayoutGrid size={16} />
@@ -135,7 +175,7 @@ export function TasksPage({ currentUser, onViewTask, onEditTask, refreshTrigger 
       )}
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 app-soft">
           <ClipboardList size={48} className="mx-auto mb-4 opacity-50" />
           <p>ไม่พบงานที่ตรงตามเงื่อนไข</p>
         </div>

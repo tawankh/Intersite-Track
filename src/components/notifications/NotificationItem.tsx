@@ -20,8 +20,8 @@ interface NotificationItemProps {
 export function NotificationItem({ notification: n, onMarkRead, onViewTask }: NotificationItemProps) {
   return (
     <div
-      className={`bg-white p-4 rounded-2xl shadow-sm border transition-all cursor-pointer hover:shadow-md ${
-        n.is_read ? "border-black/5 opacity-70" : "border-[#5A5A40]/20 bg-[#5A5A40]/[0.02]"
+      className={`app-surface p-4 rounded-2xl transition-all cursor-pointer hover:shadow-md ${
+        n.is_read ? "border-black/5 opacity-80" : "border-[#5A5A40]/20 bg-[#5A5A40]/[0.03]"
       }`}
       onClick={() => {
         if (!n.is_read) onMarkRead(n.id);
@@ -34,11 +34,11 @@ export function NotificationItem({ notification: n, onMarkRead, onViewTask }: No
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <p className="font-medium text-sm text-gray-900">{n.title}</p>
+            <p className="font-medium text-sm app-heading">{n.title}</p>
             {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#5A5A40] flex-shrink-0" />}
           </div>
-          <p className="text-sm text-gray-500">{n.message}</p>
-          <p className="text-xs text-gray-400 mt-1">{formatDateTime(n.created_at)}</p>
+          <p className="text-sm app-muted">{n.message}</p>
+          <p className="text-xs app-soft mt-1">{formatDateTime(n.created_at)}</p>
         </div>
       </div>
     </div>

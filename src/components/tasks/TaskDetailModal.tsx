@@ -99,24 +99,24 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+        className="app-surface rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.status === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-[#F5F5F0] text-[#5A5A40]"}`}>
               <ClipboardList size={20} />
             </div>
             <div>
-              <h3 className="text-xl font-serif font-bold">{task.title}</h3>
-              <p className="text-xs text-gray-400">สร้างโดย {task.creator_name} • {formatDateTime(task.created_at)}</p>
+              <h3 className="text-xl font-serif font-bold app-heading">{task.title}</h3>
+              <p className="text-xs app-soft">สร้างโดย {task.creator_name} • {formatDateTime(task.created_at)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {user.role === "admin" && (
-              <button onClick={() => onEdit(task)} className="p-2 text-gray-400 hover:text-[#5A5A40] transition-colors" title="แก้ไข">
+              <button onClick={() => onEdit(task)} className="p-2 app-soft hover:text-[#5A5A40] transition-colors" title="แก้ไข">
                 <Edit3 size={20} />
               </button>
             )}
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+            <button onClick={onClose} className="app-soft hover:text-[#1f1d16]"><X size={24} /></button>
           </div>
         </div>
 
@@ -124,16 +124,16 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
           {/* Left */}
           <div className="lg:col-span-2 space-y-8">
             <section>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">รายละเอียด</h4>
-              <p className="text-gray-700 leading-relaxed">{task.description || "ไม่มีรายละเอียด"}</p>
+              <h4 className="text-xs font-bold uppercase tracking-wider app-soft mb-3">รายละเอียด</h4>
+              <p className="app-muted leading-relaxed">{task.description || "ไม่มีรายละเอียด"}</p>
             </section>
 
             {taskChecklist.length > 0 && (
               <section>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider app-soft mb-3 flex items-center gap-1.5">
                   <ListChecks size={14} /> Checklist หัวข้อทำงาน
                 </h4>
-                <div className="bg-gray-50 rounded-2xl border border-gray-100 p-4 space-y-3">
+                <div className="app-surface-subtle rounded-2xl p-4 space-y-3">
                   {taskChecklist.map((item, idx) => {
                     const totalChildren = item.children.length;
                     const checkedChildren = item.children.filter((c) => c.is_checked).length;
@@ -141,13 +141,13 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center gap-2 group cursor-pointer" onClick={() => toggleChecklistItem(idx)}>
                           {item.is_checked ? <CheckSquare size={18} className="text-emerald-500 shrink-0" /> : <Square size={18} className="text-gray-300 group-hover:text-gray-500 shrink-0" />}
-                          <span className={`text-sm font-bold ${item.is_checked ? "text-gray-400 line-through" : "text-gray-800"}`}>{idx + 1}. {item.title}</span>
-                          {totalChildren > 0 && <span className="text-[10px] font-bold text-gray-400 ml-auto">{checkedChildren}/{totalChildren}</span>}
+                          <span className={`text-sm font-bold ${item.is_checked ? "app-soft line-through" : "app-heading"}`}>{idx + 1}. {item.title}</span>
+                          {totalChildren > 0 && <span className="text-[10px] font-bold app-soft ml-auto">{checkedChildren}/{totalChildren}</span>}
                         </div>
                         {item.children.map((child, ci) => (
                           <div key={ci} className="flex items-center gap-2 ml-7 group cursor-pointer" onClick={() => toggleChecklistItem(idx, ci)}>
                             {child.is_checked ? <CheckSquare size={16} className="text-emerald-500 shrink-0" /> : <Square size={16} className="text-gray-300 group-hover:text-gray-500 shrink-0" />}
-                            <span className={`text-sm ${child.is_checked ? "text-gray-400 line-through" : "text-gray-600"}`}>{idx + 1}.{ci + 1} {child.title}</span>
+                            <span className={`text-sm ${child.is_checked ? "app-soft line-through" : "app-muted"}`}>{idx + 1}.{ci + 1} {child.title}</span>
                           </div>
                         ))}
                       </div>
@@ -159,11 +159,11 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
                     const checked = all.filter((i) => i.is_checked).length;
                     const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
                     return (
-                      <div className="pt-3 border-t border-gray-200">
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-gray-400 font-medium">ความคืบหน้า Checklist</span>
-                          <span className="font-bold text-gray-700">{checked}/{total} ({pct}%)</span>
-                        </div>
+                        <div className="pt-3 border-t border-gray-200">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="app-soft font-medium">ความคืบหน้า Checklist</span>
+                          <span className="font-bold app-heading">{checked}/{total} ({pct}%)</span>
+                          </div>
                         <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                           <div className="h-full bg-emerald-500 rounded-full transition-all duration-300" style={{ width: `${pct}%` }} />
                         </div>
@@ -176,7 +176,7 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
 
             {user.role === "admin" && task.status !== "completed" && task.status !== "cancelled" && (
               <section>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">เปลี่ยนสถานะ</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider app-soft mb-3">เปลี่ยนสถานะ</h4>
                 <div className="flex gap-2">
                   {task.status !== "in_progress" && (
                     <button onClick={() => handleStatusChange("in_progress")} className="px-4 py-2 bg-amber-100 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-200">กำลังดำเนินการ</button>
@@ -188,13 +188,13 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
             )}
 
             <section>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">อัปเดตความคืบหน้า</h4>
-              <form onSubmit={handleSubmitUpdate} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-6">
-                <textarea className="w-full bg-white px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#5A5A40] outline-none h-20 resize-none text-sm mb-3"
+              <h4 className="text-xs font-bold uppercase tracking-wider app-soft mb-4">อัปเดตความคืบหน้า</h4>
+              <form onSubmit={handleSubmitUpdate} className="app-surface-subtle p-4 rounded-2xl mb-6">
+                <textarea className="w-full px-4 py-2 rounded-xl h-20 resize-none text-sm mb-3 app-field"
                   placeholder="บันทึกความคืบหน้า..." value={newUpdate.text}
                   onChange={(e) => setNewUpdate({ ...newUpdate, text: e.target.value })} required />
                 <div className="mb-3">
-                  <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 bg-white rounded-xl border border-gray-200 hover:border-[#5A5A40] transition-colors text-sm text-gray-500">
+                  <label className="flex items-center gap-2 cursor-pointer w-fit px-4 py-2 bg-white rounded-xl border border-gray-200 hover:border-[#5A5A40] transition-colors text-sm app-muted">
                     <ImagePlus size={16} />
                     <span>{imageFile ? imageFile.name : "แนบรูปภาพ (ถ้ามี)"}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => {
@@ -229,11 +229,11 @@ export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskD
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-bold">{update.first_name} {update.last_name}</p>
-                        <p className="text-[10px] text-gray-400">{formatDateTime(update.created_at)}</p>
+                        <p className="text-sm font-bold app-heading">{update.first_name} {update.last_name}</p>
+                        <p className="text-[10px] app-soft">{formatDateTime(update.created_at)}</p>
                       </div>
                       <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
-                        <p className="text-sm text-gray-600">{update.update_text}</p>
+                        <p className="text-sm app-muted">{update.update_text}</p>
                         {update.attachment_url && (
                           <div className="mt-2">
                             <img src={update.attachment_url} alt="แนบรูปภาพ" className="max-h-48 rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"

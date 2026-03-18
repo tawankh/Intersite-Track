@@ -55,6 +55,18 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
       ? tasks.filter((t) => t.assignments.some((a) => a.id === user.id))
       : tasks;
 
+  const today = new Date().toISOString().split("T")[0];
+  const activeTasks = myTasks.filter((t) => t.status !== "completed" && t.status !== "cancelled");
+  const overdueTasks = activeTasks.filter((t) => t.due_date && t.due_date < today);
+  const dueTodayTasks = activeTasks.filter((t) => t.due_date === today);
+  const completionRate = myTasks.length > 0 ? Math.round((myTasks.filter((t) => t.status === "completed").length / myTasks.length) * 100) : 0;
+  const focusCards = [
+    { label: user.role === "admin" ? "งานที่เปิดอยู่" : "งานของฉัน", value: activeTasks.length, tone: "text-[#5A5A40]" },
+    { label: "เลยกำหนด", value: overdueTasks.length, tone: "text-rose-600" },
+    { label: "ครบกำหนดวันนี้", value: dueTodayTasks.length, tone: "text-amber-600" },
+    { label: "ปิดงานสำเร็จ", value: `${completionRate}%`, tone: "text-emerald-600" },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -71,11 +83,20 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
         <StatCard index={4} title="ยกเลิก" value={stats.cancelled} icon={<XCircle className="text-rose-500" />} bg="bg-rose-50" />
       </div>
 
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        {focusCards.map((card) => (
+          <div key={card.label} className="app-surface-subtle rounded-2xl px-5 py-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] app-soft mb-2">{card.label}</p>
+            <p className={`text-2xl font-serif font-bold ${card.tone}`}>{card.value}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Tasks */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-black/5">
+        <div className="lg:col-span-2 app-surface rounded-3xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-serif font-bold">งานล่าสุด</h3>
+            <h3 className="text-lg font-serif font-bold app-heading">งานล่าสุด</h3>
             <button onClick={onViewAll} className="text-sm text-[#5A5A40] font-medium hover:underline">
               ดูทั้งหมด
             </button>
@@ -85,7 +106,7 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
               <div
                 key={task.id}
                 onClick={() => onViewTask(task)}
-                className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
+                className="flex items-center justify-between p-4 rounded-2xl hover:bg-[var(--app-surface-muted)] transition-colors border border-transparent hover:border-gray-100 cursor-pointer group"
               >
                 <div className="flex items-center gap-4">
                   <div
@@ -100,20 +121,20 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
                     {task.status === "completed" ? <CheckCircle2 size={20} /> : <Clock size={20} />}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">{task.title}</p>
-                    <p className="text-xs text-gray-500">กำหนดส่ง: {formatDate(task.due_date)}</p>
+                    <p className="font-medium app-heading text-sm">{task.title}</p>
+                    <p className="text-xs app-muted">กำหนดส่ง: {formatDate(task.due_date)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-md ${priorityColor[task.priority]}`}>
                     {priorityLabel[task.priority]}
                   </span>
-                  <ChevronRight size={18} className="text-gray-300 group-hover:text-gray-500" />
+                  <ChevronRight size={18} className="app-soft group-hover:text-[#5A5A40]" />
                 </div>
               </div>
             ))}
             {myTasks.length === 0 && (
-              <p className="text-center text-gray-400 py-8">ยังไม่มีงาน</p>
+              <p className="text-center app-soft py-8">ยังไม่มีงาน</p>
             )}
           </div>
         </div>
@@ -123,8 +144,8 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
           <UpcomingTasks tasks={myTasks} onViewTask={onViewTask} />
 
           {user.role === "admin" && (
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-black/5">
-              <h3 className="text-lg font-serif font-bold mb-4">เจ้าหน้าที่</h3>
+            <div className="app-surface rounded-3xl p-6">
+              <h3 className="text-lg font-serif font-bold app-heading mb-4">เจ้าหน้าที่</h3>
               <div className="space-y-4">
                 {users
                   .filter((u) => u.role === "staff")
@@ -135,8 +156,8 @@ export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: D
                         {u.first_name[0]}{u.last_name[0]}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{u.first_name} {u.last_name}</p>
-                        <p className="text-xs text-gray-400">{u.position}</p>
+                        <p className="text-sm font-medium app-heading truncate">{u.first_name} {u.last_name}</p>
+                        <p className="text-xs app-soft">{u.position}</p>
                       </div>
                       <span className="text-xs font-medium text-[#5A5A40] bg-[#F5F5F0] px-2 py-1 rounded-lg">
                         {u.department_name}

@@ -28,7 +28,7 @@ export function TaskCard({ task, onView, onEdit }: TaskCardProps) {
         duration: 0.4,
         ease: [0.22, 1, 0.36, 1], // Custom spring-like easing 
       }}
-      className="bg-white p-6 rounded-3xl shadow-sm border border-black/5 cursor-pointer group relative overflow-hidden transition-colors"
+      className="app-surface p-6 rounded-3xl cursor-pointer group relative overflow-hidden transition-colors"
     >
       <div 
         className="absolute inset-0 bg-linear-to-br from-black/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
@@ -56,15 +56,15 @@ export function TaskCard({ task, onView, onEdit }: TaskCardProps) {
           </div>
         </div>
 
-        <h4 className="font-serif font-bold text-lg text-gray-900 mb-2 group-hover:text-[#5A5A40] transition-colors">
+        <h4 className="font-serif font-bold text-lg app-heading mb-2 group-hover:text-[#5A5A40] transition-colors">
           {task.title}
         </h4>
-        <p className="text-sm text-gray-500 line-clamp-2 mb-4">{task.description}</p>
+        <p className="text-sm app-muted line-clamp-2 mb-4">{task.description}</p>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="text-gray-400 font-medium">ความคืบหน้า</span>
-            <span className="text-gray-900 font-bold">{task.progress}%</span>
+            <span className="app-soft font-medium">ความคืบหน้า</span>
+            <span className="app-heading font-bold">{task.progress}%</span>
           </div>
           <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <motion.div
@@ -76,7 +76,7 @@ export function TaskCard({ task, onView, onEdit }: TaskCardProps) {
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5 text-gray-400">
+          <div className="flex items-center gap-1.5 app-soft">
             <Calendar size={14} />
             <span>{formatDate(task.due_date)}</span>
           </div>
@@ -89,7 +89,7 @@ export function TaskCard({ task, onView, onEdit }: TaskCardProps) {
       {onEdit && (
         <button
           onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          className="absolute top-4 right-4 p-1.5 text-gray-300 hover:text-[#5A5A40] bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+          className="absolute top-4 right-4 p-1.5 app-soft hover:text-[#5A5A40] bg-white rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all"
           title="แก้ไข"
         >
           <Edit3 size={14} />

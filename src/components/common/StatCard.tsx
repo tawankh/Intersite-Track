@@ -24,12 +24,12 @@ export function StatCard({ title, value, icon, bg, index = 0 }: StatCardProps) {
         scale: 1.02,
         boxShadow: "0 12px 32px rgba(0,0,0,0.08)" 
       }}
-      className="bg-white p-5 rounded-3xl shadow-sm border border-black/5 flex items-center gap-4 cursor-default transition-colors duration-300 hover:border-black/10"
+      className="app-surface p-5 rounded-3xl flex items-center gap-4 cursor-default transition-colors duration-300 hover:border-black/10"
     >
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${bg}`}>{icon}</div>
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">{title}</p>
-        <p className="text-2xl font-serif font-bold text-gray-900">{value}</p>
+        <p className="text-xs font-bold uppercase tracking-wider app-soft mb-1">{title}</p>
+        <p className="text-2xl font-serif font-bold app-heading">{value}</p>
       </div>
     </motion.div>
   );
