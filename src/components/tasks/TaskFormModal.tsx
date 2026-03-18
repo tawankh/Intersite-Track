@@ -2,18 +2,18 @@ import React, { useState, useEffect } from "react";
 import { X, Plus, Trash2, CornerDownRight, ListChecks } from "lucide-react";
 import { motion } from "motion/react";
 import { taskService } from "../../services/taskService";
+import { userService } from "../../services/userService";
+import { taskTypeService } from "../../services/taskTypeService";
 import type { Task, User, TaskType, ChecklistItem } from "../../types";
 
 interface TaskFormModalProps {
   task: Task | null;
-  users: User[];
-  taskTypes: TaskType[];
   currentUser: User;
   onClose: () => void;
   onSave: () => void;
 }
 
-export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, onSave }: TaskFormModalProps) {
+export function TaskFormModal({ task, currentUser, onClose, onSave }: TaskFormModalProps) {
   const [form, setForm] = useState({
     title: task?.title || "",
     description: task?.description || "",
@@ -24,10 +24,28 @@ export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, on
     assigned_user_ids: task?.assignments.map((a) => a.id) || [] as number[],
   });
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
 
   useEffect(() => {
+    const fetchSelectData = async () => {
+      try {
+        const [u, tt] = await Promise.all([
+          userService.getUsers(),
+          taskTypeService.getTaskTypes()
+        ]);
+        setUsers(u);
+        setTaskTypes(tt);
+      } catch (e) {
+        console.error("Failed to load users/taskTypes", e);
+      }
+    };
+    
+    fetchSelectData();
+
     if (task) {
       taskService.getChecklists(task.id).then((rows) => {
         const parents = rows.filter((r: any) => !r.parent_id);
@@ -40,7 +58,10 @@ export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, on
           })),
         }));
         setChecklist(items);
-      }).catch(() => {});
+        setLoadingInitial(false);
+      }).catch(() => { setLoadingInitial(false); });
+    } else {
+      setLoadingInitial(false);
     }
   }, [task]);
 
@@ -86,7 +107,7 @@ export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, on
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
         className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
           <h3 className="text-xl font-serif font-bold">{task ? "แก้ไขงาน" : "สร้างงานใหม่"}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
         </div>
@@ -96,7 +117,7 @@ export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, on
             <div className="md:col-span-2">
               <label className="block text-xs font-bold uppercase text-gray-400 mb-1">ชื่องาน *</label>
               <input type="text" className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#5A5A40] outline-none"
-                value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} disabled={loadingInitial} required />
             </div>
             <div>
               <label className="block text-xs font-bold uppercase text-gray-400 mb-1">ประเภทงาน</label>
@@ -141,7 +162,7 @@ export function TaskFormModal({ task, users, taskTypes, currentUser, onClose, on
 
             {/* Checklist */}
             <div className="md:col-span-2">
-              <label className="block text-xs font-bold uppercase text-gray-400 mb-2 flex items-center gap-1">
+              <label className="flex text-xs font-bold uppercase text-gray-400 mb-2 items-center gap-1">
                 <ListChecks size={14} /> Checklist หัวข้อทำงาน
               </label>
               <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 space-y-3">

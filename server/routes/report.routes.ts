@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
 
+router.get("/", requireAuth, getStatsHandler);
 router.get("/stats", requireAuth, getStatsHandler);
 router.get("/by-staff", requireAuth, getStaffReportHandler);
 router.get("/by-date-range", requireAuth, getDateRangeReport);

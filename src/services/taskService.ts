@@ -29,8 +29,8 @@ export const taskService = {
 
   deleteTask: (id: number) => api.delete<void>(`/api/tasks/${id}`),
 
-  updateStatus: (id: number, status: string, progress: number) =>
-    api.patch<void>(`/api/tasks/${id}/status`, { status, progress }),
+  updateStatus: (id: number, status: string, progress?: number) =>
+    api.patch<void>(`/api/tasks/${id}/status`, { status, ...(progress !== undefined && { progress }) }),
 
   getUpdates: (taskId: number) => api.get<TaskUpdate[]>(`/api/tasks/${taskId}/updates`),
 

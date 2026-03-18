@@ -1,21 +1,55 @@
+import { useState, useEffect } from "react";
 import { ClipboardList, Clock, AlertCircle, CheckCircle2, XCircle, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 import { StatCard } from "../common/StatCard";
 import { UpcomingTasks } from "./UpcomingTasks";
+import { DashboardSkeleton } from "../common/Skeleton";
+import { taskService } from "../../services/taskService";
+import { userService } from "../../services/userService";
 import { formatDate } from "../../utils/formatters";
 import { priorityLabel, priorityColor } from "../../utils/constants";
 import type { Task, User, Stats } from "../../types";
 
 interface DashboardPageProps {
-  stats: Stats;
-  tasks: Task[];
-  users: User[];
   user: User;
   onViewTask: (task: Task) => void;
   onViewAll: () => void;
+  refreshTrigger?: number;
 }
 
-export function DashboardPage({ stats, tasks, users, user, onViewTask, onViewAll }: DashboardPageProps) {
+export function DashboardPage({ user, onViewTask, onViewAll, refreshTrigger }: DashboardPageProps) {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>({ total: 0, completed: 0, inProgress: 0, pending: 0, cancelled: 0 });
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [s, t, u] = await Promise.all([
+          taskService.getStats(),
+          taskService.getTasks(),
+          user.role === "admin" ? userService.getUsers() : Promise.resolve([])
+        ]);
+        if (mounted) {
+          setStats(s);
+          setTasks(t);
+          setUsers(u);
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    loadData();
+    return () => { mounted = false; };
+  }, [user.role, refreshTrigger]);
+
+  if (loading) return <DashboardSkeleton />;
+
   const myTasks =
     user.role === "staff"
       ? tasks.filter((t) => t.assignments.some((a) => a.id === user.id))

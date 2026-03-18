@@ -9,7 +9,7 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({ message, onConfirm, onCancel }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-60">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

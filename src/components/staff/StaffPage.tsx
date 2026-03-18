@@ -1,22 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Eye, Edit3, Trash2, X } from "lucide-react";
 import { motion } from "motion/react";
+import { TasksSkeleton } from "../common/Skeleton";
 import api from "../../services/api";
+import { userService } from "../../services/userService";
 import { formatDate } from "../../utils/formatters";
 import { statusColor, statusLabel, priorityColor, priorityLabel } from "../../utils/constants";
 import type { User, Department, Task } from "../../types";
 
 interface StaffPageProps {
-  users: User[];
-  departments: Department[];
   onEdit: (user: User) => void;
   onDelete: (id: number) => void;
+  refreshTrigger?: number; // Used by App to trigger refresh
 }
 
-export function StaffPage({ users, departments: _departments, onEdit, onDelete }: StaffPageProps) {
+export function StaffPage({ onEdit, onDelete, refreshTrigger = 0 }: StaffPageProps) {
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  
   const [search, setSearch] = useState("");
   const [staffTasks, setStaffTasks] = useState<Record<number, Task[]>>({});
   const [viewingStaff, setViewingStaff] = useState<User | null>(null);
+
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      const [u, d] = await Promise.all([
+        userService.getUsers(),
+        userService.getDepartments()
+      ]);
+      setUsers(u);
+      setDepartments(d);
+    } catch (error) {
+      console.error("Failed to load staff data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAll();
+  }, [refreshTrigger]);
+
+  if (loading) return <TasksSkeleton />;
 
   const staffUsers = users.filter((u) => {
     if (search && !`${u.first_name} ${u.last_name} ${u.username} ${u.position}`.toLowerCase().includes(search.toLowerCase())) return false;

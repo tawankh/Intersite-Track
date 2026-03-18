@@ -9,6 +9,32 @@ export interface LoginCredentials {
 
 export const authService = {
   /**
+   * Sign up: create Supabase Auth account + app profile, then auto-login
+   */
+  async signUp(email: string, password: string): Promise<User> {
+    // 1. Create Supabase Auth + app profile via public endpoint
+    await api.post("/api/auth/signup", { email, password });
+
+    // 2. Auto-login with the new credentials
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      if (error.message.includes("Email not confirmed")) {
+        throw new Error("กรุณายืนยันอีเมลของคุณก่อนเข้าสู่ระบบ");
+      }
+      throw new Error(error.message);
+    }
+
+    if (!data.session) throw new Error("ไม่สามารถสร้าง session ได้");
+
+    // 3. Fetch app profile
+    const profile = await api.post<User>("/api/auth/profile", {});
+    const user = { ...profile, token: data.session.access_token };
+    localStorage.setItem("user", JSON.stringify(user));
+    return user;
+  },
+
+  /**
    * Sign in via Supabase Auth, then fetch app profile (role, dept) from backend.
    */
   async signIn(email: string, password: string): Promise<User> {

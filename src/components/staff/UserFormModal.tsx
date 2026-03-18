@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { motion } from "motion/react";
 import { userService } from "../../services/userService";
@@ -6,12 +6,11 @@ import type { User, Department } from "../../types";
 
 interface UserFormModalProps {
   user: User | null;
-  departments: Department[];
   onClose: () => void;
   onSave: () => void;
 }
 
-export function UserFormModal({ user, departments, onClose, onSave }: UserFormModalProps) {
+export function UserFormModal({ user, onClose, onSave }: UserFormModalProps) {
   const [form, setForm] = useState({
     username: user?.username || "",
     password: "",
@@ -23,6 +22,18 @@ export function UserFormModal({ user, departments, onClose, onSave }: UserFormMo
   });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+
+  useEffect(() => {
+    userService.getDepartments().then((d) => {
+      setDepartments(d);
+      setLoadingInitial(false);
+    }).catch((e) => {
+      console.error(e);
+      setLoadingInitial(false);
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +104,7 @@ export function UserFormModal({ user, departments, onClose, onSave }: UserFormMo
             <div>
               <label className="block text-xs font-bold uppercase text-gray-400 mb-1">หน่วยงาน</label>
               <select className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#5A5A40] outline-none"
-                value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
+                value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })} disabled={loadingInitial}>
                 <option value="">-- เลือก --</option>
                 {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>

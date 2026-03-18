@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { motion } from "motion/react";
 import { formatDate } from "../../utils/formatters";
 import type { Task } from "../../types";
 
@@ -18,14 +19,18 @@ export function UpcomingTasks({ tasks, onViewTask }: UpcomingTasksProps) {
       <h3 className="text-lg font-serif font-bold mb-4 flex items-center gap-2">
         <AlertTriangle size={18} className="text-amber-500" /> งานใกล้ครบกำหนด
       </h3>
-      <div className="space-y-3">
-        {upcoming.map((t) => {
+      <div className="space-y-3 relative overflow-hidden">
+        {upcoming.map((t, index) => {
           const daysLeft = Math.ceil((new Date(t.due_date).getTime() - Date.now()) / 86400000);
           return (
-            <div
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              whileHover={{ scale: 1.02, x: 4 }}
               key={t.id}
               onClick={() => onViewTask(t)}
-              className="p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="p-3 rounded-xl border border-gray-100 hover:bg-gray-50 hover:border-black/5 cursor-pointer transition-colors"
             >
               <p className="font-medium text-sm text-gray-900 truncate">{t.title}</p>
               <div className="flex justify-between items-center mt-1">
@@ -44,7 +49,7 @@ export function UpcomingTasks({ tasks, onViewTask }: UpcomingTasksProps) {
                   {daysLeft <= 0 ? "เลยกำหนด!" : `อีก ${daysLeft} วัน`}
                 </span>
               </div>
-            </div>
+            </motion.div>
           );
         })}
         {upcoming.length === 0 && (

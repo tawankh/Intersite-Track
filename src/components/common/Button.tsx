@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 type Size = "sm" | "md" | "lg";
@@ -38,12 +39,15 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
+      whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       disabled={disabled || loading}
       className={`inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {loading ? "กำลังโหลด..." : children}
-    </button>
+    </motion.button>
   );
 }

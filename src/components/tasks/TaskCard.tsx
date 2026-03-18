@@ -15,13 +15,25 @@ interface TaskCardProps {
 export function TaskCard({ task, onView, onEdit }: TaskCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.25 }}
-      className="bg-white p-6 rounded-3xl shadow-sm border border-black/5 cursor-pointer group relative"
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      whileHover={{ 
+        y: -6, 
+        scale: 1.01,
+        boxShadow: "0 20px 40px rgba(0,0,0,0.06)",
+        borderColor: "rgba(0,0,0,0.1)"
+      }}
+      whileTap={{ scale: 0.98, y: 0 }}
+      transition={{ 
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1], // Custom spring-like easing 
+      }}
+      className="bg-white p-6 rounded-3xl shadow-sm border border-black/5 cursor-pointer group relative overflow-hidden transition-colors"
     >
+      <div 
+        className="absolute inset-0 bg-linear-to-br from-black/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+        style={{ pointerEvents: 'none' }}
+      />
       <div onClick={onView}>
         <div className="flex items-start justify-between mb-4">
           <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-md ${priorityColor[task.priority]}`}>

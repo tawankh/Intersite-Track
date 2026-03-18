@@ -16,16 +16,13 @@ const isDev = process.env.NODE_ENV !== "production";
 app.use(express.json());
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// API routes
+// API routes (must come before SPA routes)
 app.use("/api", apiRateLimiter, apiRoutes);
-
-// Error handling
-app.use(notFound);
-app.use(errorHandler);
 
 async function start() {
   await initDB();
 
+  // Vite SPA or static serving (before error handlers)
   if (isDev) {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
@@ -33,6 +30,10 @@ async function start() {
     app.use(express.static(path.join(process.cwd(), "dist")));
     app.get("*", (_req, res) => res.sendFile(path.join(process.cwd(), "dist", "index.html")));
   }
+
+  // Error handling (must come after all other routes)
+  app.use(notFound);
+  app.use(errorHandler);
 
   app.listen(PORT, () => {
     console.warn(`🚀 Intersite Track running on http://localhost:${PORT}`);

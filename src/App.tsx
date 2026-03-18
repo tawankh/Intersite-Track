@@ -27,12 +27,8 @@ import type { User, Task, Department, TaskType, Notification, Stats } from "./ty
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, completed: 0, inProgress: 0, pending: 0, cancelled: 0 });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -44,14 +40,12 @@ export default function App() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ message: string; onConfirm: () => void } | null>(null);
 
+  const triggerRefresh = useCallback(() => setRefreshTrigger((prev) => prev + 1), []);
+
   useEffect(() => {
-    // Initialize from Supabase session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        const saved = authService.getStoredUser();
-        if (saved) setUser(saved);
-      }
-    });
+    // Restore user from localStorage first (faster, no DB access)
+    const saved = authService.getStoredUser();
+    if (saved) setUser(saved);
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -71,19 +65,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchAll = useCallback(async () => {
-    if (!user) return;
-    try {
-      const [t, u, d, tt, s] = await Promise.all([
-        taskService.getTasks(),
-        userService.getUsers(),
-        userService.getDepartments(),
-        import("./services/taskTypeService").then((m) => m.taskTypeService.getTaskTypes()),
-        taskService.getStats(),
-      ]);
-      setTasks(t); setUsers(u); setDepartments(d); setTaskTypes(tt); setStats(s);
-    } catch {}
-  }, [user]);
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -96,7 +77,7 @@ export default function App() {
     } catch {}
   }, [user]);
 
-  useEffect(() => { fetchAll(); fetchNotifications(); }, [fetchAll, fetchNotifications, activeTab]);
+  useEffect(() => { fetchNotifications(); }, [fetchNotifications, activeTab, refreshTrigger]);
 
   useEffect(() => {
     if (!user) return;
@@ -141,24 +122,23 @@ export default function App() {
         <AnimatePresence mode="wait">
           {activeTab === "dashboard" && (
             <React.Fragment key="dashboard">
-              <DashboardPage stats={stats} tasks={tasks} users={users} user={user}
-                onViewTask={setSelectedTask} onViewAll={() => setActiveTab("tasks")} />
+              <DashboardPage user={user}
+                onViewTask={setSelectedTask} onViewAll={() => setActiveTab("tasks")} refreshTrigger={refreshTrigger} />
             </React.Fragment>
           )}
           {activeTab === "tasks" && (
             <React.Fragment key="tasks">
-              <TasksPage tasks={tasks} users={users} taskTypes={taskTypes} currentUser={user}
-                onViewTask={setSelectedTask} onEditTask={(t) => { setEditingTask(t); setTaskFormOpen(true); }}
-                onRefresh={fetchAll} />
+              <TasksPage currentUser={user} refreshTrigger={refreshTrigger}
+                onViewTask={setSelectedTask} onEditTask={(t) => { setEditingTask(t); setTaskFormOpen(true); }} />
             </React.Fragment>
           )}
           {activeTab === "staff" && (
             <React.Fragment key="staff">
-              <StaffPage users={users} departments={departments} onEdit={(u) => { setEditingUser(u); setUserFormOpen(true); }}
-                onDelete={(uid) => setConfirmDialog({ message: "ต้องการลบเจ้าหน้าที่นี้?", onConfirm: async () => { await userService.deleteUser(uid); fetchAll(); setConfirmDialog(null); } })} />
+              <StaffPage refreshTrigger={refreshTrigger} onEdit={(u) => { setEditingUser(u); setUserFormOpen(true); }}
+                onDelete={(uid) => setConfirmDialog({ message: "ต้องการลบเจ้าหน้าที่นี้?", onConfirm: async () => { await userService.deleteUser(uid); triggerRefresh(); setConfirmDialog(null); } })} />
             </React.Fragment>
           )}
-          {activeTab === "reports" && <React.Fragment key="reports"><ReportsPage stats={stats} /></React.Fragment>}
+          {activeTab === "reports" && <React.Fragment key="reports"><ReportsPage refreshTrigger={refreshTrigger} /></React.Fragment>}
           {activeTab === "notifications" && (
             <React.Fragment key="notifications">
               <NotificationsPage notifications={notifications}
@@ -169,31 +149,31 @@ export default function App() {
           )}
           {activeTab === "settings" && (
             <React.Fragment key="settings">
-              <SettingsPage departments={departments} taskTypes={taskTypes} users={users} onRefresh={fetchAll} />
+              <SettingsPage refreshTrigger={refreshTrigger} />
             </React.Fragment>
           )}
         </AnimatePresence>
       </MainLayout>
 
       {taskFormOpen && (
-        <TaskFormModal task={editingTask} users={users} taskTypes={taskTypes} currentUser={user}
+        <TaskFormModal task={editingTask} currentUser={user}
           onClose={() => { setTaskFormOpen(false); setEditingTask(null); }}
-          onSave={() => { setTaskFormOpen(false); setEditingTask(null); fetchAll(); }} />
+          onSave={() => { setTaskFormOpen(false); setEditingTask(null); triggerRefresh(); }} />
       )}
       {selectedTask && (
-        <TaskDetailModal task={selectedTask} user={user} taskTypes={taskTypes}
+        <TaskDetailModal task={selectedTask} user={user}
           onClose={() => setSelectedTask(null)}
-          onUpdate={async () => { fetchAll(); fetchNotifications(); try { const t = await taskService.getTask(selectedTask.id); setSelectedTask(t); } catch {} }}
+          onUpdate={async () => { triggerRefresh(); fetchNotifications(); try { const t = await taskService.getTask(selectedTask.id); setSelectedTask(t); } catch {} }}
           onEdit={(t) => { setSelectedTask(null); setEditingTask(t); setTaskFormOpen(true); }} />
       )}
       {userFormOpen && (
-        <UserFormModal user={editingUser} departments={departments}
+        <UserFormModal user={editingUser}
           onClose={() => { setUserFormOpen(false); setEditingUser(null); }}
-          onSave={() => { setUserFormOpen(false); setEditingUser(null); fetchAll(); }} />
+          onSave={() => { setUserFormOpen(false); setEditingUser(null); triggerRefresh(); }} />
       )}
       {profileOpen && (
         <ProfileModal user={user} onClose={() => setProfileOpen(false)}
-          onSave={(updated) => { setUser(updated); localStorage.setItem("user", JSON.stringify(updated)); setProfileOpen(false); fetchAll(); }} />
+          onSave={(updated) => { setUser(updated); localStorage.setItem("user", JSON.stringify(updated)); setProfileOpen(false); triggerRefresh(); }} />
       )}
       {confirmDialog && (
         <ConfirmDialog message={confirmDialog.message} onConfirm={confirmDialog.onConfirm} onCancel={() => setConfirmDialog(null)} />

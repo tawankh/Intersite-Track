@@ -1,6 +1,70 @@
 import { Request, Response, NextFunction } from "express";
-import { findUserById } from "../database/queries/user.queries";
+import { findUserById, createUser } from "../database/queries/user.queries";
 import { supabaseAdmin } from "../config/supabase";
+
+/**
+ * POST /api/auth/signup
+ * Public endpoint: create Supabase Auth user + basic app profile (staff role)
+ */
+export async function signup(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400).json({ error: "กรุณากรอกอีเมลและรหัสผ่าน" });
+      return;
+    }
+
+    if (password.length < 8) {
+      res.status(400).json({ error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
+      return;
+    }
+
+    // Create Supabase Auth user (email_confirm: false, will send verification)
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Skip email verification for internal system
+    });
+
+    if (authError) {
+      res.status(400).json({
+        error: authError.message.includes("already registered")
+          ? "อีเมลนี้มีอยู่ในระบบแล้ว"
+          : authError.message,
+      });
+      return;
+    }
+
+    const authId = authData.user.id;
+
+    // Create basic app profile with staff role, rollback Auth user if DB fails
+    try {
+      const username = email.split("@")[0]; // Use email prefix as username
+      const id = await createUser({
+        username,
+        email,
+        auth_id: authId,
+        first_name: "",
+        last_name: "",
+        role: "staff", // Default role
+        department_id: null,
+        position: null,
+      });
+      res.status(201).json({ id, email });
+    } catch (dbErr: unknown) {
+      await supabaseAdmin.auth.admin.deleteUser(authId).catch(() => {});
+      const msg = dbErr instanceof Error ? dbErr.message : "";
+      if (msg.includes("unique") || msg.includes("duplicate")) {
+        res.status(400).json({ error: "อีเมลนี้มีอยู่ในระบบแล้ว" });
+      } else {
+        next(dbErr);
+      }
+    }
+  } catch (err) {
+    next(err);
+  }
+}
 
 /**
  * POST /api/auth/profile

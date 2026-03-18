@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { getProfile, changePassword } from "../controllers/auth.controller";
+import { signup, getProfile, changePassword } from "../controllers/auth.controller";
 import { requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
+
+// Public: Create account via Supabase Auth + app profile
+router.post("/auth/signup", signup);
 
 // Called by frontend after Supabase sign-in to get app profile (role, dept, etc.)
 router.post("/auth/profile", requireAuth, getProfile);

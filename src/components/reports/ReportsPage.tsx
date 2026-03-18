@@ -1,26 +1,45 @@
 import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
 import { motion } from "motion/react";
+import { DashboardSkeleton } from "../common/Skeleton";
+import { taskService } from "../../services/taskService";
 import { reportService } from "../../services/reportService";
 import { formatDate } from "../../utils/formatters";
 import { statusColor, statusLabel } from "../../utils/constants";
 import type { Stats, StaffReport } from "../../types";
 
 interface ReportsPageProps {
-  stats: Stats;
+  refreshTrigger?: number; // Used by App to trigger refresh
 }
 
-export function ReportsPage({ stats }: ReportsPageProps) {
+export function ReportsPage({ refreshTrigger = 0 }: ReportsPageProps) {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>({ total: 0, completed: 0, inProgress: 0, pending: 0, cancelled: 0 });
   const [staffReport, setStaffReport] = useState<StaffReport[]>([]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [dateReport, setDateReport] = useState<Record<string, unknown>[]>([]);
 
-  useEffect(() => { loadStaffReport(); }, []);
-
-  const loadStaffReport = async () => {
-    const data = await reportService.getStaffReport();
-    setStaffReport(data);
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      const [s, sr] = await Promise.all([
+        taskService.getStats(),
+        reportService.getStaffReport()
+      ]);
+      setStats(s);
+      setStaffReport(sr);
+    } catch (error) {
+      console.error("Failed to load reports data", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchAll();
+  }, [refreshTrigger]);
+
+  if (loading) return <DashboardSkeleton />;
 
   const loadDateReport = async () => {
     if (!dateRange.start || !dateRange.end) return;

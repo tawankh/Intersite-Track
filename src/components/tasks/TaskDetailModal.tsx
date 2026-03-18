@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Edit3, Calendar, ClipboardList, ListChecks, Square, CheckSquare, ImagePlus } from "lucide-react";
 import { motion } from "motion/react";
 import { taskService } from "../../services/taskService";
+import { taskTypeService } from "../../services/taskTypeService";
 import { formatDate, formatDateTime } from "../../utils/formatters";
 import { priorityLabel, priorityColor, statusLabel, statusDot } from "../../utils/constants";
 import type { Task, User, TaskType, TaskUpdate, ChecklistItem } from "../../types";
@@ -9,13 +10,12 @@ import type { Task, User, TaskType, TaskUpdate, ChecklistItem } from "../../type
 interface TaskDetailModalProps {
   task: Task;
   user: User;
-  taskTypes: TaskType[];
   onClose: () => void;
   onUpdate: () => void;
   onEdit: (task: Task) => void;
 }
 
-export function TaskDetailModal({ task, user, taskTypes, onClose, onUpdate, onEdit }: TaskDetailModalProps) {
+export function TaskDetailModal({ task, user, onClose, onUpdate, onEdit }: TaskDetailModalProps) {
   const [updates, setUpdates] = useState<TaskUpdate[]>([]);
   const [newUpdate, setNewUpdate] = useState({ text: "", progress: task.progress });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -23,8 +23,13 @@ export function TaskDetailModal({ task, user, taskTypes, onClose, onUpdate, onEd
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [taskChecklist, setTaskChecklist] = useState<ChecklistItem[]>([]);
+  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
 
-  useEffect(() => { fetchUpdates(); fetchChecklist(); }, [task.id]);
+  useEffect(() => { 
+    fetchUpdates(); 
+    fetchChecklist(); 
+    taskTypeService.getTaskTypes().then(setTaskTypes).catch(() => {});
+  }, [task.id]);
 
   const fetchChecklist = async () => {
     try {
@@ -95,7 +100,7 @@ export function TaskDetailModal({ task, user, taskTypes, onClose, onUpdate, onEd
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.status === "completed" ? "bg-emerald-100 text-emerald-600" : "bg-[#F5F5F0] text-[#5A5A40]"}`}>
               <ClipboardList size={20} />
@@ -135,13 +140,13 @@ export function TaskDetailModal({ task, user, taskTypes, onClose, onUpdate, onEd
                     return (
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center gap-2 group cursor-pointer" onClick={() => toggleChecklistItem(idx)}>
-                          {item.is_checked ? <CheckSquare size={18} className="text-emerald-500 flex-shrink-0" /> : <Square size={18} className="text-gray-300 group-hover:text-gray-500 flex-shrink-0" />}
+                          {item.is_checked ? <CheckSquare size={18} className="text-emerald-500 shrink-0" /> : <Square size={18} className="text-gray-300 group-hover:text-gray-500 shrink-0" />}
                           <span className={`text-sm font-bold ${item.is_checked ? "text-gray-400 line-through" : "text-gray-800"}`}>{idx + 1}. {item.title}</span>
                           {totalChildren > 0 && <span className="text-[10px] font-bold text-gray-400 ml-auto">{checkedChildren}/{totalChildren}</span>}
                         </div>
                         {item.children.map((child, ci) => (
                           <div key={ci} className="flex items-center gap-2 ml-7 group cursor-pointer" onClick={() => toggleChecklistItem(idx, ci)}>
-                            {child.is_checked ? <CheckSquare size={16} className="text-emerald-500 flex-shrink-0" /> : <Square size={16} className="text-gray-300 group-hover:text-gray-500 flex-shrink-0" />}
+                            {child.is_checked ? <CheckSquare size={16} className="text-emerald-500 shrink-0" /> : <Square size={16} className="text-gray-300 group-hover:text-gray-500 shrink-0" />}
                             <span className={`text-sm ${child.is_checked ? "text-gray-400 line-through" : "text-gray-600"}`}>{idx + 1}.{ci + 1} {child.title}</span>
                           </div>
                         ))}
@@ -219,7 +224,7 @@ export function TaskDetailModal({ task, user, taskTypes, onClose, onUpdate, onEd
               <div className="space-y-6">
                 {updates.map((update) => (
                   <div key={update.id} className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-[#F5F5F0] flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-[#5A5A40]">
+                    <div className="w-8 h-8 rounded-full bg-[#F5F5F0] shrink-0 flex items-center justify-center text-[10px] font-bold text-[#5A5A40]">
                       {update.first_name[0]}{update.last_name[0]}
                     </div>
                     <div className="flex-1">

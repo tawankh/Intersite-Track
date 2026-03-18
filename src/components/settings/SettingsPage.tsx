@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Edit3, Trash2, X, CheckCircle2, Settings, Tag, ArrowLeftRight, FileText } from "lucide-react";
 import { motion } from "motion/react";
+import { TasksSkeleton } from "../common/Skeleton";
 import { userService } from "../../services/userService";
 import { taskTypeService } from "../../services/taskTypeService";
 import TrelloSettings from "./TrelloSettings";
@@ -8,19 +9,47 @@ import TrelloSyncLogs from "./TrelloSyncLogs";
 import type { Department, TaskType, User } from "../../types";
 
 interface SettingsPageProps {
-  departments: Department[];
-  taskTypes: TaskType[];
-  users: User[];
-  onRefresh: () => void;
+  refreshTrigger?: number; // Used by App to trigger refresh
 }
 
-export function SettingsPage({ departments, taskTypes, users, onRefresh }: SettingsPageProps) {
+export function SettingsPage({ refreshTrigger = 0 }: SettingsPageProps) {
+  const [loading, setLoading] = useState(true);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
   const [tab, setTab] = useState<"departments" | "taskTypes" | "trello" | "trelloLogs">("departments");
   const [newDeptName, setNewDeptName] = useState("");
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [newTypeName, setNewTypeName] = useState("");
   const [editingType, setEditingType] = useState<TaskType | null>(null);
   const [error, setError] = useState("");
+
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      const [d, tt, u] = await Promise.all([
+        userService.getDepartments(),
+        taskTypeService.getTaskTypes(),
+        userService.getUsers()
+      ]);
+      setDepartments(d);
+      setTaskTypes(tt);
+      setUsers(u);
+    } catch (err) {
+      console.error("Failed to load settings data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAll();
+  }, [refreshTrigger]);
+
+  if (loading) return <TasksSkeleton />;
+
+  const onRefresh = fetchAll;
 
   const handleAddDept = async () => {
     if (!newDeptName.trim()) return;

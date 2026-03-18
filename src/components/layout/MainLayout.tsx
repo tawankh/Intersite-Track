@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import type { User } from "../../types";
@@ -38,18 +38,36 @@ export function MainLayout({
   onCreateUser,
   children,
 }: MainLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab);
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-[#F5F5F0] flex">
+    <div className="min-h-screen bg-[#F5F5F0] dark:bg-[#121212] flex transition-colors duration-300">
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar
         user={user}
         activeTab={activeTab}
-        onTabChange={onTabChange}
+        onTabChange={handleTabChange}
         onLogout={onLogout}
         onProfileClick={onProfileClick}
         unreadCount={unreadCount}
         tabs={tabs}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+
+      <main className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         <Header
           title={tabTitles[activeTab] || activeTab}
           user={user}
@@ -58,8 +76,11 @@ export function MainLayout({
           onNotificationClick={onNotificationClick}
           onCreateTask={onCreateTask}
           onCreateUser={onCreateUser}
+          onMenuToggle={() => setSidebarOpen((v) => !v)}
         />
-        <div className="flex-1 overflow-y-auto p-8">{children}</div>
+        <div className="p-4 md:p-8 h-full overflow-y-auto text-gray-900 dark:text-gray-100">
+          {children}
+        </div>
       </main>
     </div>
   );
