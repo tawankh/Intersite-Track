@@ -6,6 +6,7 @@ import departmentRoutes from "./department.routes.js";
 import taskTypeRoutes from "./taskType.routes.js";
 import notificationRoutes from "./notification.routes.js";
 import reportRoutes from "./report.routes.js";
+import trelloRoutes from "./trello.routes.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/task-types", taskTypeRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/reports", reportRoutes);
 router.use("/stats", reportRoutes);
+router.use("/trello", trelloRoutes);
 
 export default router;
