@@ -12,6 +12,7 @@ interface UserFormModalProps {
 
 export function UserFormModal({ user, onClose, onSave }: UserFormModalProps) {
   const [form, setForm] = useState({
+    email: user?.email || "",
     username: user?.username || "",
     password: "",
     first_name: user?.first_name || "",
@@ -50,8 +51,9 @@ export function UserFormModal({ user, onClose, onSave }: UserFormModalProps) {
       if (user) {
         await userService.updateUser(user.id, payload);
       } else {
+        if (!form.email) { setError("กรุณากรอกอีเมล"); setSaving(false); return; }
         if (!form.password) { setError("กรุณากรอกรหัสผ่าน"); setSaving(false); return; }
-        await userService.createUser({ ...payload, password: form.password });
+        await userService.createUser({ ...payload, email: form.email, password: form.password });
       }
       onSave();
     } catch (e: any) {
@@ -89,11 +91,20 @@ export function UserFormModal({ user, onClose, onSave }: UserFormModalProps) {
               value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required />
           </div>
           {!user && (
-            <div>
-              <label className="block text-xs font-bold uppercase app-soft mb-1">รหัสผ่าน *</label>
-              <input type="password" className="w-full px-4 py-2 rounded-xl app-field"
-                value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-            </div>
+            <>
+              <div>
+                <label className="block text-xs font-bold uppercase app-soft mb-1">อีเมล *</label>
+                <input type="email" className="w-full px-4 py-2 rounded-xl app-field"
+                  placeholder="example@email.com"
+                  value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase app-soft mb-1">รหัสผ่าน *</label>
+                <input type="password" className="w-full px-4 py-2 rounded-xl app-field"
+                  placeholder="อย่างน้อย 8 ตัวอักษร"
+                  value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+              </div>
+            </>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -23,15 +23,15 @@ export const FEATURES = {
   KANBAN_VIEW: true,
 
   // Phase 3
-  COMMENTS: false, // Requires DB migration
-  ACTIVITY_LOG: false, // Requires DB migration
+  COMMENTS: true,
+  ACTIVITY_LOG: true,
 
   // Phase 4
   DASHBOARD_REORDER: true,
   PDF_EXPORT: true,
 
   // Auth helpers
-  QUICK_LOGIN: isQuickLoginEnvironment && isQuickLoginFlagEnabled,
+  QUICK_LOGIN: isQuickLoginFlagEnabled,
 };
 
 /** Aliased shape used by components */
